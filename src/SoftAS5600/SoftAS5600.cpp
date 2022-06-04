@@ -1,6 +1,9 @@
 #include "SoftAS5600.h"
 
-SoftAS5600::SoftAS5600(uint8_t sda_pin, uint8_t scl_pin, uint32_t clock = 400000){
+SoftAS5600::SoftAS5600(){
+}
+
+SoftAS5600::SoftAS5600(uint8_t sda_pin, uint8_t scl_pin, uint32_t clock){
     sw = SoftwareWire(sda_pin, scl_pin);
     sw.begin();
     sw.setClock(clock);
