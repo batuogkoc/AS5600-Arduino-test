@@ -3,28 +3,27 @@
 #include <ros.h>
 #include <std_msgs/Int16.h>
 #include "SoftAS5600/SoftAS5600.h"
-
-const uint8_t as5600_slave_address = 0x36;
-const uint8_t as5600_raw_angle_address = 0x0c;
-const uint8_t as5600_status_address = 0x0b;
-
-
-// SoftwareWire sw1(9,8);
-// SoftwareWire sw2(A4,A5);
-SoftAS5600 encoder1(9,8);
+SoftAS5600 encoder1;
+SoftAS5600 encoder2;
 
 uint32_t last_micros = 0;
 
 ros::NodeHandle nh;
 std_msgs::Int16 encoder1_pos;
-ros::Publisher pub("encoder1_pos", &encoder1_pos);
+std_msgs::Int16 encoder2_pos;
+
+ros::Publisher pub1("encoder1_pos", &encoder1_pos);
+ros::Publisher pub2("encoder2_pos", &encoder2_pos);
+
 
 void setup()
 {
-  Serial.begin(2000000);
-  nh.getHardware()->setBaud(2000000);
+  encoder1 = SoftAS5600(9,8);
+  encoder2 = SoftAS5600(A4, A5);
   nh.initNode();
-  nh.advertise(pub);
+  nh.advertise(pub1);
+  nh.advertise(pub2);
+  nh.spinOnce();
 }
 
 
@@ -37,11 +36,17 @@ void loop()
   reading1 = encoder1.readRawAngle();
   if(reading1 != encoder1.invaid_angle){
     encoder1_pos.data = reading1;
-    pub.publish(&encoder1_pos);
-    nh.spinOnce();
+    pub1.publish(&encoder1_pos);
   }
-  last_micros = current_micros;
 
+  uint16_t reading2 = 0;
+  reading2 = encoder2.readRawAngle();
+  if(reading2 != encoder2.invaid_angle){
+    encoder2_pos.data = reading2;
+    pub2.publish(&encoder2_pos);
+  }
+  nh.spinOnce();
+  last_micros = current_micros;
 }
 
 
